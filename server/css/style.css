@@ -147,3 +147,18 @@ body {
     font-style: italic;
 }
 
+.buttonsRow{
+    padding: 10px;
+    display: flex;
+    gap: 10px;
+}
+
+.buttonsRow button {
+    background: none;
+    border: none;
+    cursor: pointer;
+    font-size: 28px;
+    padding: 6px;
+    color: #444;
+    transition: color 0.2s, transform 0.2s;
+}
