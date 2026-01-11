@@ -1,3 +1,6 @@
+import maplibregl from 'maplibre-gl';
+import * as pmtiles from 'pmtiles';
+
 // Define map. Style it with achtergrondkaart from the kadaster
 window.map = new maplibregl.Map({ 
     container: 'map', 
@@ -10,24 +13,26 @@ map.addControl(new maplibregl.NavigationControl()); map.addControl(new maplibreg
 // Listen events.Display lat/lon in the console when clicking
 map.on('click', (e) => {console.log(e.lngLat); });
 
-// map.on('load', () => {
-//     map.addSource('hillshade', {
-//         type: 'raster', // 'raster' for image tiles
-//         tiles: [
-//             'http://gilfoyle.bk.tudelft.nl:8080/hillshade_dtm.pmtiles/{z}/{x}/{y}.png'
-//         ],
-//         tileSize: 256
-//     });
 
-//     map.addLayer({
-//         id: 'hillshade-layer',
-//         type: 'raster',  // 'raster' shows the image
-//         source: 'hillshade',
-//         paint: {
-//             'raster-opacity': 0.7
-//         }
-//     });
-// });
+const protocol = new pmtiles.Protocol();
+maplibregl.addProtocol('pmtiles', protocol.tile);
+const PMTILES_URL = 'http://localhost:5000/hillshade_dtm.pmtiles';
+map.on('load', () => {
+    map.addSource('hillshade', {
+        type: 'raster',
+        url: `pmtiles://${PMTILES_URL}`,
+        tileSize: 256
+    });
+
+    map.addLayer({
+        id: 'hillshade-layer',
+        type: 'raster',  // 'raster' shows the image
+        source: 'hillshade',
+        paint: {
+            'raster-opacity': 1
+        }
+    });
+});
 
 
 // Add administrative boundaries layer (Bestuurlijke Gebieden)

@@ -10,10 +10,16 @@
   <!-- Google material Icons -->
   <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined" rel="stylesheet" />
   <!-- DuckDB WASM-->
-  <script src="https://cdn.jsdelivr.net/npm/@duckdb/duckdb-wasm@1.28.1/dist/duckdb-wasm.js"></script>
+  <!-- <script src="https://cdn.jsdelivr.net/npm/@duckdb/duckdb-wasm@1.28.1/dist/duckdb-wasm.js"></script> -->
   <!-- proj4js -->
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/proj4js/2.9.0/proj4.js"></script>
+  <!-- <script src="https://cdnjs.cloudflare.com/ajax/libs/proj4js/2.9.0/proj4.js"></script> -->
+    <!-- Load MapLibre library -->
+  <!-- <script src="https://unpkg.com/maplibre-gl/dist/maplibre-gl.js"></script> -->
 
+    <!-- Handle query tools -->
+  <script type="module" src="js/main.js"></script>
+  <!-- Handle map and layers -->
+  <script type="module" src=js/map.js></script>
 
   <!-- Add a style file -->
   <link rel="stylesheet" href="css/style.css">
@@ -49,15 +55,6 @@
       <span class="material-symbols-outlined"> search </span>
     </button>
   </div>
-
-  <!-- Load MapLibre library -->
-  <script src="https://unpkg.com/maplibre-gl/dist/maplibre-gl.js"></script>
-
-  <!-- Handle map and layers -->
-  <script src=js/map.js></script>
-
-  <!-- Handle query tools -->
-  <script type="module" src="js/main.js"></script>
 
 </body>
 </html>

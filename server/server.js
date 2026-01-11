@@ -92,10 +92,6 @@ app.post('/getPolygon', (req, res) => {
 app.post('/downloadBbox', (req, res) => {
     const { x1, y1, x2, y2, product, resolution } = req.body;
     console.log(`Download requested: ${product} ${resolution} [${x1}, ${y1}, ${x2}, ${y2}]`);
-
-    // TODO: Implement the logic to generate or fetch the requested GeoTIFF.
-    // Since the raster processing logic is not currently available, we return a 501 error.
-    // This allows the client to handle the error gracefully.
     
     res.status(501).json({ error: "Raster download functionality is not yet implemented on the server." });
 });

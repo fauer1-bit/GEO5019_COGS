@@ -12,7 +12,7 @@ async function triggerDownload(b, product, resolution) {
         body: JSON.stringify({ x1, y1, x2, y2, product, resolution})
     });
     console.log("Fetch response status:", response.status);
-
+    
     if(!response.ok) {
         const error = await response.json();
         console.error("Server error:", error);
