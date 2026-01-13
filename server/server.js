@@ -20,6 +20,7 @@ app.use(express.static(__dirname));
 // Open boundaries_database.db
 const dbPath = 'boundaries_database.db';
 const absolutePath = path.resolve(__dirname, dbPath);
+console.log(absolutePath)
 
 console.log(`Connecting to database at: ${absolutePath}`);
 if (!fs.existsSync(absolutePath)) {
@@ -37,22 +38,22 @@ db.exec(`
   LOAD httpfs;
 `);
 
-// db.all("SHOW TABLES", (err, rows) => {
-//     if (err) {
-//         console.error("Error listing tables:", err);
-//         return;
-//     }
-//     console.log("Tables in DB:", rows);
-//     const tableExists = rows.some(r => r.name === 'municipality_boundaries');
-//     if (tableExists) {
-//         console.log("Table 'municipality_boundaries' exists.");
-//         db.all("DESCRIBE municipality_boundaries", (err, cols) => {
-//             if (!err) console.log("Columns:", cols.map(c => c.column_name));
-//         });
-//     } else {
-//         console.error("ERROR: Table 'municipality_boundaries' NOT found!");
-//     }
-// });
+db.all("SHOW TABLES", (err, rows) => {
+    if (err) {
+        console.error("Error listing tables:", err);
+        return;
+    }
+    console.log("Tables in DB:", rows);
+    const tableExists = rows.some(r => r.name === 'municipality_boundaries');
+    if (tableExists) {
+        console.log("Table 'municipality_boundaries' exists.");
+        db.all("DESCRIBE municipality_boundaries", (err, cols) => {
+            if (!err) console.log("Columns:", cols.map(c => c.column_name));
+        });
+    } else {
+        console.error("ERROR: Table 'municipality_boundaries' NOT found!");
+    }
+});
 
 // Create endpoint to request municipality polygons 
 app.post('/getPolygon', (req, res) => {
@@ -66,7 +67,7 @@ app.post('/getPolygon', (req, res) => {
     db.all(`
         SELECT ST_AsGeoJSON(geometry) as geometry 
         FROM municipality_boundaries 
-        WHERE name ILIKE ?
+        WHERE name ILIKE '%' || ? || '%'
         LIMIT 1
     `, name, (err, rows) => {
         if(err) {
@@ -94,6 +95,17 @@ app.post('/downloadBbox', (req, res) => {
     console.log(`Download requested: ${product} ${resolution} [${x1}, ${y1}, ${x2}, ${y2}]`);
     
     res.status(501).json({ error: "Raster download functionality is not yet implemented on the server." });
+});
+
+// Endpoint to check tables from the browser
+app.get('/debug/tables', (req, res) => {
+    db.all("SHOW TABLES", (err, rows) => {
+        if (err) {
+            res.status(500).json({ error: err.message });
+        } else {
+            res.json(rows);
+        }
+    });
 });
 
 // Start the server

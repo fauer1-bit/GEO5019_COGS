@@ -16,10 +16,13 @@
     <!-- Load MapLibre library -->
   <!-- <script src="https://unpkg.com/maplibre-gl/dist/maplibre-gl.js"></script> -->
 
-    <!-- Handle query tools -->
+  <!-- Handle query tools -->
   <script type="module" src="js/main.js"></script>
   <!-- Handle map and layers -->
   <script type="module" src=js/map.js></script>
+
+  <script src="https://unpkg.com/pmtiles@4.3.2/dist/pmtiles.js"></script>
+
 
   <!-- Add a style file -->
   <link rel="stylesheet" href="css/style.css">
@@ -36,8 +39,8 @@
 
   <!-- Input a layers menu box -->
   <div id="layersMenu">
-    <label><input type="checkbox" id="layer1"> Hillshade</label><br>
-    <label><input type="checkbox" id="layer2"> Colored DTM</label>
+    <label><input type="checkbox" id="layer1"> DTM</label><br>
+    <label><input type="checkbox" id="layer2"> DSM</label>
   </div>
 
   <!-- Toolbox icons -->

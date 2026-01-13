@@ -45,3 +45,16 @@ queryPlace.addEventListener('click', () => {
     query = result.query
     if (query) { queryDataset(query) };
 });
+
+// Automatically check tables when the page loads
+fetch('/debug/tables')
+    .then(res => {
+        if (!res.ok) {
+            throw new Error(`Server returned ${res.status}: ${res.statusText}`);
+        }
+        return res.json();
+    })
+    .then(tables => {
+        console.log("Database Tables found:", tables);
+    })
+    .catch(err => console.error("Could not check tables:", err));

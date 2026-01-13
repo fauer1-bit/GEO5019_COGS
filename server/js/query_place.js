@@ -8,7 +8,12 @@ async function fetchPolygonFromServer(name) {
     });
     console.log("Fetch response status:", response.status);
     if(!response.ok) {
-        const error = await response.json();
+        let error;
+        try {
+            error = await response.json();
+        } catch (e) {
+            error = { error: `Server returned ${response.status}: ${response.statusText}` };
+        }
         console.error("Server error:", error);
         alert(error.error);
         return null;
