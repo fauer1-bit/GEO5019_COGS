@@ -4,13 +4,13 @@ import { fileURLToPath } from 'url';
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
-// Configuration for COG file locations
-// Files are stored locally on the server alongside the scripts
+// Configuration for COG file locations (currently on my laptop (frederick))
+// change here these file paths to where the files will be stored on server. 
 export const COG_CONFIG = {
-    baseDir: path.resolve(__dirname, '../../testCOG'),
+    baseDir: path.resolve(__dirname, '../../testCOG'), // <<<<<<<<----------
     files: {
-        DTM: 'DTM_outputtest_COG.TIF',
-        DSM: 'DSM_outputtest_COG.tif'
+        DTM: 'DTM_outputtest_COG.TIF',  // <<<<<<<<----------
+        DSM: 'DSM_outputtest_COG.tif' // <<<<<<<<----------
     }
 };
 
@@ -30,3 +30,4 @@ export default {
     getCogPath,
     COG_CONFIG
 };
+
