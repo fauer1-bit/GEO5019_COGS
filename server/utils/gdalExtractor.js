@@ -8,7 +8,7 @@ const __dirname = path.dirname(__filename);
 
 // Get GDAL paths from environment (loaded by server.js)
 const GDAL_BIN_PATH = process.env.GDAL_BIN_PATH;
-const GDAL_DATA = process.env.GDAL_DATA;
+// const GDAL_DATA = process.env.GDAL_DATA;
 
 // Determine the gdal_translate executable path
 let gdalTranslatePath = 'gdal_translate'; // Default: assume it's in PATH, (for testing locally on laptop.)
@@ -26,9 +26,9 @@ if (GDAL_BIN_PATH) {
 }
 
 // Set GDAL_DATA environment variable if specified
-if (GDAL_DATA && !process.env.GDAL_DATA) {
-    process.env.GDAL_DATA = GDAL_DATA;
-}
+// if (GDAL_DATA && !process.env.GDAL_DATA) {
+//     process.env.GDAL_DATA = GDAL_DATA;
+// }
 
 /**
  * Maps resolution string to target resolution for GDAL

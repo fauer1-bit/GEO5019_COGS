@@ -1,3 +1,5 @@
+import proj4 from 'https://esm.sh/proj4@2.9.0';
+import maplibregl from 'https://esm.sh/maplibre-gl@4.7.1';
 
 // Function to fetch municipality polygon
 async function fetchPolygonFromServer(name) {
@@ -27,12 +29,6 @@ async function fetchPolygonFromServer(name) {
 }
 
 function GeoJSONWebMercator(geojson) {
-    // Ensure proj4 is available globally
-    if (typeof window.proj4 === 'undefined') {
-        console.error("Proj4 is not loaded. Please add <script src='https://cdnjs.cloudflare.com/ajax/libs/proj4js/2.9.0/proj4.js'></script> to your HTML.");
-        return geojson;
-    }
-    const proj4 = window.proj4;
 
     // Define projections
     const RD_NEW = '+proj=sterea +lat_0=52.15616055555555 +lon_0=5.38763888888889 +k=0.9999079 +x_0=155000 +y_0=463000 +ellps=bessel +units=m +no_defs';
@@ -85,9 +81,8 @@ export function queryPlaceTool(box, other_boxes) {
         // If the box is already open, close it when clicked
         if (b && document.body.contains(b)){
             document.body.removeChild(b);
-            // Remove existing layer/source if they exist
-            if (map.getLayer('municipality-outline')) map.removeLayer('municipality-outline');
-            if (map.getSource('municipality')) map.removeSource('municipality');
+            // Remove key listener if it exists
+            if (b._keyListener) document.removeEventListener('keydown', b._keyListener);
             return null
         } 
         // Otherwise, display toolbox
@@ -97,7 +92,7 @@ export function queryPlaceTool(box, other_boxes) {
             box.classList.add('coordinatesBox');
             const boxTitle = document.createElement('div');
             boxTitle.classList.add('boxTitle');
-            boxTitle.textContent = "Query Place";
+            boxTitle.textContent = "Search municipality";
             box.appendChild(boxTitle);
             // Create a search input
             const searchContainer = document.createElement('div');
@@ -139,7 +134,7 @@ export function queryPlaceTool(box, other_boxes) {
                         });
 
                         // Zoom map to the polygon to visually verify it
-                        const bounds = new window.maplibregl.LngLatBounds();
+                        const bounds = new maplibregl.LngLatBounds();
                         const extendBounds = (coords) => {
                             if (typeof coords[0] === 'number') bounds.extend(coords);
                             else coords.forEach(extendBounds);
@@ -151,6 +146,16 @@ export function queryPlaceTool(box, other_boxes) {
                     }
                 }
             });
+            
+            // Add Escape key listener to remove municipality layer
+            const onEscape = (e) => {
+                if (e.key === 'Escape') {
+                    if (map.getLayer('municipality-outline')) map.removeLayer('municipality-outline');
+                    if (map.getSource('municipality')) map.removeSource('municipality');
+                }
+            };
+            document.addEventListener('keydown', onEscape);
+            box._keyListener = onEscape;
 
             searchContainer.appendChild(searchInput);
             box.appendChild(searchContainer);
@@ -166,5 +171,5 @@ export function queryPlaceTool(box, other_boxes) {
     
     // Toggle box
     box = toggleBox(box, other_boxes);
-    return { box, query: null };
+    return box
 }
