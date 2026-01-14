@@ -5,15 +5,16 @@
   <title>MapLibre Test</title>
 
   <!-- Include dependencies -->
-  <!-- MapLibre -->
-  <link href="https://unpkg.com/maplibre-gl/dist/maplibre-gl.css" rel="stylesheet" />
+  <!-- MapLibre CSS (pinned) -->
+  <link href="https://unpkg.com/maplibre-gl@4.7.1/dist/maplibre-gl.css" rel="stylesheet" />
   <!-- Google material Icons -->
   <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined" rel="stylesheet" />
   <!-- DuckDB WASM-->
   <script src="https://cdn.jsdelivr.net/npm/@duckdb/duckdb-wasm@1.28.1/dist/duckdb-wasm.js"></script>
   <!-- proj4js -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/proj4js/2.9.0/proj4.js"></script>
-
+  <!-- geotiff.js -->
+  <script src="https://cdn.jsdelivr.net/npm/geotiff@2.0.7/dist-browser/geotiff.js"></script>
 
   <!-- Add a style file -->
   <link rel="stylesheet" href="css/style.css">
@@ -32,6 +33,7 @@
   <div id="layersMenu">
     <label><input type="checkbox" id="layer1"> Hillshade</label><br>
     <label><input type="checkbox" id="layer2"> Colored DTM</label>
+    <label><input type="checkbox" id="layerDSM"> Test DSM layer</label><br>
   </div>
 
   <!-- Toolbox icons -->
@@ -50,14 +52,131 @@
     </button>
   </div>
 
-  <!-- Load MapLibre library -->
-  <script src="https://unpkg.com/maplibre-gl/dist/maplibre-gl.js"></script>
+  <!-- Load MapLibre GL JS first (needed globally) -->
+  <script src="https://unpkg.com/maplibre-gl@4.7.1/dist/maplibre-gl.js"></script>
+  
+  <!-- Initialize everything in a single module for proper sequencing -->
+  <script type="module">
+    // Import COG protocol as ES module
+    import { cogProtocol } from 'https://unpkg.com/maplibre-cog-protocol@0.7.1/dist/index.js';
+    
+    // Register the COG protocol FIRST
+    console.log("Registering COG protocol...");
+    maplibregl.addProtocol("cog", cogProtocol);
+    console.log("✓ COG protocol registered!");
+    window.cogProtocolRegistered = true;
 
-  <!-- Handle map and layers -->
-  <script src=js/map.js></script>
+    // NOW create the map
+    window.map = new maplibregl.Map({ 
+        container: 'map', 
+        style: 'https://api.pdok.nl/kadaster/brt-achtergrondkaart/ogc/v1/styles/standaard__webmercatorquad', 
+        center: [5., 52.15], 
+        zoom: 6.8
+    });
+    
+    // Add controls for navigation to map
+    map.addControl(new maplibregl.NavigationControl());
+    map.addControl(new maplibregl.ScaleControl());
+    
+    // Listen events. Display lat/lon in the console when clicking
+    map.on('click', (e) => { console.log(e.lngLat); });
+    
+    console.log("✓ Map created!");
 
-  <!-- Handle query tools -->
-  <script type="module" src="js/main.js"></script>
+    // DSM COG layer toggle
+    const dsmCheckbox = document.getElementById("layerDSM");
+
+    function addDsmCogLayer() {
+      if (!window.map) return;
+
+      if (!map.getSource("dsm-cog")) {
+        map.addSource("dsm-cog", {
+          type: "raster",
+          tiles: ["cog://http://localhost:3000/data/dsm/dsm_sample_05m_cog_3857.tif"],
+          tileSize: 512
+        });
+      }
+
+      if (!map.getLayer("dsm-layer")) {
+        map.addLayer({
+          id: "dsm-layer",
+          type: "raster",
+          source: "dsm-cog",
+          paint: { "raster-opacity": 0.8 }
+        });
+      }
+    }
+
+    function removeDsmCogLayer() {
+      if (!window.map) return;
+
+      if (map.getLayer("dsm-layer")) map.removeLayer("dsm-layer");
+      if (map.getSource("dsm-cog")) map.removeSource("dsm-cog");
+    }
+
+    function whenMapReady(fn) {
+      if (!window.map) return console.warn("Map not available");
+      if (map.loaded()) fn();
+      else map.once("load", fn);
+    }
+
+    if (dsmCheckbox) {
+      dsmCheckbox.addEventListener("change", (e) => {
+        whenMapReady(() => {
+          if (e.target.checked) addDsmCogLayer();
+          else removeDsmCogLayer();
+        });
+      });
+    }
+    
+    // Import and initialize query tools
+    // Note: Adjust paths if your modules have different exports
+    try {
+      const { queryPointsTool } = await import('./js/query_points.js');
+      const { queryPolylineTool } = await import('./js/query_polyline.js');
+      const { queryBboxTool } = await import('./js/query_bbox.js');
+      const { queryPlaceTool } = await import('./js/query_place.js');
+      const { queryDataset } = await import('./js/query_data.js');
+      
+      let queryPointsToolBox = null;
+      let queryPolylineToolBox = null;
+      let queryBboxToolBox = null;
+      let queryPlaceToolBox = null;
+      let query = null;
+
+      document.getElementById('queryPoints')?.addEventListener('click', () => {
+          const result = queryPointsTool(queryPointsToolBox, [queryPolylineToolBox, queryBboxToolBox, queryPlaceToolBox]);
+          queryPointsToolBox = result.box;
+          query = result.query;
+          if (query) { queryDataset(query) };
+      });
+      
+      document.getElementById('queryPolyline')?.addEventListener('click', () => {
+          const result = queryPolylineTool(queryPolylineToolBox, [queryPointsToolBox, queryBboxToolBox, queryPlaceToolBox]);
+          queryPolylineToolBox = result.box;
+          query = result.query;
+          if (query) { queryDataset(query) };
+      });
+      
+      document.getElementById('queryBbox')?.addEventListener('click', () => {
+          const result = queryBboxTool(queryBboxToolBox, [queryPointsToolBox, queryPolylineToolBox, queryPlaceToolBox]);
+          queryBboxToolBox = result.box;
+          query = result.query;
+          if (query) { queryDataset(query) };
+      });
+      
+      document.getElementById('queryPlace')?.addEventListener('click', () => {
+          const result = queryPlaceTool(queryPlaceToolBox, [queryPointsToolBox, queryPolylineToolBox, queryBboxToolBox]);
+          queryPlaceToolBox = result.box;
+          query = result.query;
+          if (query) { queryDataset(query) };
+      });
+      
+      console.log("✓ Query tools initialized!");
+    } catch (e) {
+      console.warn("Query tools not loaded (modules may not exist):", e.message);
+    }
+  </script>
 
 </body>
 </html>

@@ -17,6 +17,16 @@ app.use(cors());
 // Serve static files (index.html, css, js) from the current directory
 app.use(express.static(__dirname));
 
+// Add route to serve data files
+app.use('/data', express.static(path.join(__dirname, 'data')));
+
+// Log COG requests with Range header
+app.use('/data', (req, res, next) => {
+  console.log(`COG request: ${req.headers.range || 'full file'}`);
+  next();
+}, express.static(path.join(__dirname, 'data')));
+
+
 // Open boundaries_database.db
 const dbPath = 'boundaries_database.db';
 const absolutePath = path.resolve(__dirname, dbPath);
@@ -87,6 +97,9 @@ app.post('/getPolygon', (req, res) => {
         }
     });
 });
+
+
+
 
 // Start the server
 app.listen(PORT, () => {
