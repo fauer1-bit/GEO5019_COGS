@@ -10,6 +10,7 @@ Serve the pmtiles directory, by default in port 5000. Activate CORS.
 Currently, map.js opens pmtiles from the following paths:
 
 `http://localhost:5000/hillshade_dtm.pmtiles` (line 18)
+
 `http://localhost:5000/hillshade_dsm.pmtiles` (line 27)
 
 If a different port is used to serve the pmtiles directory, update accordingly.
