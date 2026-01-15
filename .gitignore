@@ -1,1 +1,6 @@
 server/node_modules/
+testCOG/
+temp/
+.vscode/
+data/
+src/
